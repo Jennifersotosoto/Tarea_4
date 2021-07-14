@@ -1,5 +1,5 @@
 ---
-title: "Presencia de Orquidias en los ASP"
+title: "Presencia de las Orquidias en las Areas Silvestres Protegidas (ASP)"
 output: html_document
 ---
 
@@ -7,7 +7,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-
+### Carga de paquetes 
 ```{r message=FALSE, warning=FALSE}
 library(sf)
 library(leaflet)
@@ -18,6 +18,7 @@ library(plotly)
 library(tidyr)
 ```
 
+## Cargar los datos
 ```{r message=FALSE}
 # Carga de la capa de áreas silvestres protegidas (ASP)
 asp <-
@@ -39,7 +40,10 @@ options = c(
 # Asignación del sistema de coordenadas
 st_crs(Orquideas) <- 4326
 ```
+
+## Eliminar los registros con un valor mayor que 1000  
 ```{r cambio-tipo-de-datos, message=FALSE}
+#Cambio tipo de datos
 Orquideas<- 
   Orquideas%>% 
   mutate(coordinateUncertaintyInMeters= as.numeric(coordinateUncertaintyInMeters))%>%
@@ -47,7 +51,7 @@ Orquideas<-
 ```
 
 ```{r limpieza-datos, message= FALSE, warning=FALSE}
-#Descartar registros con alta incertidumbre en la ubicación 
+#Descartar los datos de alta incertidumbre en la ubicación 
 cat("cantidad original de registros:", nrow(Orquideas))
 Orquideas<- 
   Orquideas%>%
@@ -57,9 +61,8 @@ Orquideas<-
 cat("cantidad de registros después de descartar los de alta incertidumbre en la ubicación:", nrow(Orquideas))
 ```
 
-
+## Eliminar los registros con valor vacío o NA en el campo species
 ```{r}
-#elimine los registros con valor vacío o NA en el campo species
 cat("cantidad original de registros:", nrow(Orquideas))
 Orquideas<-Orquideas[!(Orquideas$species== ""),]
 ```
@@ -98,9 +101,8 @@ registro_asp<-
 sf::st_crs(registro_asp)=4326
 
 ```
-
+### Mapa
 ```{r}
-# Mapa
 
 # Paleta de colores
 colores_especies <-
