@@ -1,0 +1,160 @@
+---
+title: "Tarea 4"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r message=FALSE, warning=FALSE}
+library(sf)
+library(leaflet)
+library(leaflet.extras)
+library(leafem)
+library(raster)
+library(dplyr)
+library(rmapshaper)
+library(DT)
+library(spData)
+library(plotly)
+library(tidyr)
+```
+
+```{r message=FALSE}
+# Carga de la capa de provincias
+provincias<-
+  st_read(
+    "https://raw.githubusercontent.com/gf0604-procesamientodatosgeograficos/2021i-datos/main/ign/delimitacion-territorial-administrativa/cr_provincias_simp_wgs84.geojson",
+    quiet = TRUE
+  )
+
+# Carga de la capa de áreas silvestres protegidas (ASP)
+asp <-
+  st_read(
+    "https://raw.githubusercontent.com/gf0604-procesamientodatosgeograficos/2021i-datos/main/sinac/asp/asp-wgs84.geojson",
+    quiet = TRUE
+  )
+
+
+
+
+# Carga de la capa de mamíferos Orquideas
+ Orquideas<-
+   st_read("https://raw.githubusercontent.com/gf0604-procesamientodatosgeograficos/2021i-datos/main/gbif/orchidaceae-cr-registros.csv",
+options = c(
+      "X_POSSIBLE_NAMES=decimalLongitude",
+      "Y_POSSIBLE_NAMES=decimalLatitude"
+    ),
+    quiet = TRUE
+  )
+
+# Asignación del sistema de coordenadas
+st_crs(Orquideas) <- 4326
+```
+```{r cambio-tipo-de-datos, message=FALSE}
+Orquideas<- 
+  Orquideas%>% 
+  mutate(coordinateUncertaintyInMeters= as.numeric(coordinateUncertaintyInMeters))%>%
+  mutate(eventDate=as.Date(eventDate,"%Y-%m-%d"))
+```
+
+```{r limpieza-datos, message= FALSE, warning=FALSE}
+cat("cantidad original de registros:", nrow(Orquideas))
+#Descartar registros con alta incertidumbre en la ubicación 
+Orquideas<- 
+  Orquideas%>%
+  filter(!is.na(coordinateUncertaintyInMeters)& coordinateUncertaintyInMeters <= 1000)
+```
+```{r}
+cat("cantidad de registros después de descartar los de alta incertidumbre en la ubicación:", nrow(Orquideas))
+```
+
+
+```{r}
+#elimine los registros con valor vacío o NA en el campo species
+cat("cantidad original de registros:", nrow(Orquideas))
+Orquideas<-Orquideas[!(Orquideas$species== ""),]
+```
+```{r}
+cat("cantidad de registros después de eliminar las celdas vacias en las especies:", nrow(Orquideas))
+```
+## Eliminar los registros de Area Marina de Manejo y Area marina protejida de los ASP
+```{r message=FALSE}
+cat("cantidad originas de registos:", nrow(asp))
+asp<-asp[!(asp$descripcio=='Area Marina de Manejo'),]
+```
+```{r}
+cat("cantidad de registros después de eliminar los registros de Area marina:", nrow(asp))
+```
+
+```{r}
+cat("cantidad original de registos:", nrow(asp))
+asp<-asp[!(asp$descripcio=='Area marina protegida'),]
+```
+```{r}
+cat("cantidad de registros después de eliminar los registros de Area marina:", nrow(asp))
+```
+
+## Visualización de los datos en el mapa 
+```{r}
+# 
+registro_asp<-
+  asp%>%
+  sf::st_make_valid()%>%
+  sf::st_join(Orquideas)%>%
+  group_by(nombre_asp)%>%
+  summarize(especies= n())
+# Asignación de crs al conjunto 
+sf::st_crs(registro_asp)=4326
+
+```
+
+```{r}
+# Mapa
+
+# Paleta de colores
+colores_especies <-
+  colorNumeric(palette = "YlGnBu",
+               domain = registro_asp$especies,
+               na.color = "transparent")
+
+# Mapa Leaflet
+leaflet() %>%
+  addTiles(group = "OSM") %>%
+  addPolygons(
+    data =registro_asp,
+    fillColor = ~ colores_especies(registro_asp$especies),
+    fillOpacity = 0.7,
+    stroke = TRUE,
+    color = "black",
+    weight = 1,
+    popup = paste(
+      paste(
+        "<strong>ASP</strong>",
+      registro_asp$nombre_asp
+      ),
+      paste(
+        "<strong>Cantidad de especies:</strong>",
+        registro_asp$especies
+        
+      ),
+      sep = '<br/>'
+    ),
+    group = "ASP- especies"
+  ) %>%
+  addLayersControl(baseGroups = c("OSM"),
+                   overlayGroups = c("ASP-especies")) %>%
+  addLegend(
+    position = "bottomleft",
+    pal = colores_especies,
+    values =registro_asp$especies,
+    group = "ASP-especies",
+    title = "Cantidad de Orquideas"
+  )
+```
+
+
+
+
