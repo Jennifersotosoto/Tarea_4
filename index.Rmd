@@ -47,8 +47,8 @@ Orquideas<-
 ```
 
 ```{r limpieza-datos, message= FALSE, warning=FALSE}
-cat("cantidad original de registros:", nrow(Orquideas))
 #Descartar registros con alta incertidumbre en la ubicación 
+cat("cantidad original de registros:", nrow(Orquideas))
 Orquideas<- 
   Orquideas%>%
   filter(!is.na(coordinateUncertaintyInMeters)& coordinateUncertaintyInMeters <= 1000)
