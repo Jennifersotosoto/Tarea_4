@@ -1,5 +1,5 @@
 ---
-title: "Tarea 4"
+title: "Presencia de Orquidias en los ASP"
 output: html_document
 ---
 
@@ -11,11 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r message=FALSE, warning=FALSE}
 library(sf)
 library(leaflet)
-library(leaflet.extras)
-library(leafem)
-library(raster)
 library(dplyr)
-library(rmapshaper)
 library(DT)
 library(spData)
 library(plotly)
@@ -23,13 +19,6 @@ library(tidyr)
 ```
 
 ```{r message=FALSE}
-# Carga de la capa de provincias
-provincias<-
-  st_read(
-    "https://raw.githubusercontent.com/gf0604-procesamientodatosgeograficos/2021i-datos/main/ign/delimitacion-territorial-administrativa/cr_provincias_simp_wgs84.geojson",
-    quiet = TRUE
-  )
-
 # Carga de la capa de áreas silvestres protegidas (ASP)
 asp <-
   st_read(
@@ -37,10 +26,7 @@ asp <-
     quiet = TRUE
   )
 
-
-
-
-# Carga de la capa de mamíferos Orquideas
+# Cargar la capa de Orquideas
  Orquideas<-
    st_read("https://raw.githubusercontent.com/gf0604-procesamientodatosgeograficos/2021i-datos/main/gbif/orchidaceae-cr-registros.csv",
 options = c(
@@ -82,6 +68,7 @@ cat("cantidad de registros después de eliminar las celdas vacias en las especie
 ```
 ## Eliminar los registros de Area Marina de Manejo y Area marina protejida de los ASP
 ```{r message=FALSE}
+#Eliminar Area Marina de Manejo
 cat("cantidad originas de registos:", nrow(asp))
 asp<-asp[!(asp$descripcio=='Area Marina de Manejo'),]
 ```
@@ -90,6 +77,7 @@ cat("cantidad de registros después de eliminar los registros de Area marina:", 
 ```
 
 ```{r}
+#Eliminar Area marina protegida
 cat("cantidad original de registos:", nrow(asp))
 asp<-asp[!(asp$descripcio=='Area marina protegida'),]
 ```
@@ -99,7 +87,7 @@ cat("cantidad de registros después de eliminar los registros de Area marina:", 
 
 ## Visualización de los datos en el mapa 
 ```{r}
-# 
+# Añadir la capa de Orquideas al ASP
 registro_asp<-
   asp%>%
   sf::st_make_valid()%>%
@@ -138,7 +126,6 @@ leaflet() %>%
       paste(
         "<strong>Cantidad de especies:</strong>",
         registro_asp$especies
-        
       ),
       sep = '<br/>'
     ),
