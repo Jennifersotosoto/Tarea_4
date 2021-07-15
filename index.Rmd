@@ -81,7 +81,7 @@ cat("Cantidad de registros después de eliminar los registros de Area marina:", 
 
 ```{r}
 #Eliminar Area marina protegida
-cat("Cantidad original de registos:", nrow(asp))
+cat("Cantidad original de registros:", nrow(asp))
 asp<-asp[!(asp$descripcio=='Area marina protegida'),]
 ```
 ```{r}
