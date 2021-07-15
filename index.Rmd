@@ -1,5 +1,5 @@
 ---
-title: "Presencia de las Orquidias en las Areas Silvestres Protegidas (ASP)"
+title: "Presencia de las Orquideas en las Areas Silvestres Protegidas (ASP)"
 output: html_document
 ---
 
@@ -43,7 +43,7 @@ st_crs(Orquideas) <- 4326
 
 ## Eliminar los registros con un valor mayor que 1000  
 ```{r cambio-tipo-de-datos, message=FALSE}
-#Cambio tipo de datos
+#Cambiar tipo de datos
 Orquideas<- 
   Orquideas%>% 
   mutate(coordinateUncertaintyInMeters= as.numeric(coordinateUncertaintyInMeters))%>%
@@ -52,40 +52,40 @@ Orquideas<-
 
 ```{r limpieza-datos, message= FALSE, warning=FALSE}
 #Descartar los datos de alta incertidumbre en la ubicación 
-cat("cantidad original de registros:", nrow(Orquideas))
+cat("Cantidad original de registros:", nrow(Orquideas))
 Orquideas<- 
   Orquideas%>%
   filter(!is.na(coordinateUncertaintyInMeters)& coordinateUncertaintyInMeters <= 1000)
 ```
 ```{r}
-cat("cantidad de registros después de descartar los de alta incertidumbre en la ubicación:", nrow(Orquideas))
+cat("Cantidad de registros después de descartar los de alta incertidumbre en la ubicación:", nrow(Orquideas))
 ```
 
-## Eliminar los registros con valor vacío o NA en el campo species
+## Eliminar los registros con valor vacío o N/A en el campo especies
 ```{r}
-cat("cantidad original de registros:", nrow(Orquideas))
+cat("Cantidad original de registros:", nrow(Orquideas))
 Orquideas<-Orquideas[!(Orquideas$species== ""),]
 ```
 ```{r}
-cat("cantidad de registros después de eliminar las celdas vacias en las especies:", nrow(Orquideas))
+cat("Cantidad de registros después de eliminar las celdas vacias en las especies:", nrow(Orquideas))
 ```
 ## Eliminar los registros de Area Marina de Manejo y Area marina protejida de los ASP
 ```{r message=FALSE}
 #Eliminar Area Marina de Manejo
-cat("cantidad originas de registos:", nrow(asp))
+cat("Cantidad originas de registos:", nrow(asp))
 asp<-asp[!(asp$descripcio=='Area Marina de Manejo'),]
 ```
 ```{r}
-cat("cantidad de registros después de eliminar los registros de Area marina:", nrow(asp))
+cat("Cantidad de registros después de eliminar los registros de Area marina:", nrow(asp))
 ```
 
 ```{r}
 #Eliminar Area marina protegida
-cat("cantidad original de registos:", nrow(asp))
+cat("Cantidad original de registos:", nrow(asp))
 asp<-asp[!(asp$descripcio=='Area marina protegida'),]
 ```
 ```{r}
-cat("cantidad de registros después de eliminar los registros de Area marina:", nrow(asp))
+cat("Cantidad de registros después de eliminar los registros de Area marina:", nrow(asp))
 ```
 
 ## Visualización de los datos en el mapa 
